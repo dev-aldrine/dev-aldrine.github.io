@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>dev@portfolio: ~</title>
+<title>dev@aldrine: ~</title>
 <style>
   :root {
     --desk: #ffffff;
@@ -147,6 +147,15 @@
   .hero-name .accent { color: var(--green); }
   .hero-role { color: var(--magenta); font-size: 17px; }
   .hero-blurb { color: var(--dim); max-width: 58ch; margin: 18px 0 26px; }
+  .focus-cards { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 26px; }
+  .focus-card {
+    border: 1px solid var(--line); border-radius: 8px;
+    background: #0a0a0d; padding: 10px 14px; font-size: 13px; color: var(--text);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: border-color 150ms ease, transform 150ms ease;
+  }
+  .focus-card:hover { border-color: var(--green); transform: translateY(-2px); }
+  .focus-card::before { content: "▹"; color: var(--green); }
   .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
   .btn {
     display: inline-flex; align-items: center; min-height: 44px;
@@ -165,6 +174,23 @@
   .kv dt::after { content: ":"; color: var(--dim); }
   .kv dd { color: var(--text); }
 
+  /* stat cards row */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-top: 16px;
+  }
+  .stat {
+    border: 1px solid var(--line); border-radius: 8px;
+    background: #4b4b4b; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+    transition: border-color 150ms ease, transform 150ms ease;
+  }
+  .stat:hover { border-color: var(--green); transform: translateY(-2px); }
+  .stat .stat-key { color: var(--cyan); font-size: 12px; }
+  .stat .stat-key::after { content: ":"; color: var(--dim); }
+  .stat .stat-val { color: var(--text); font-size: 14px; font-weight: 600; }
+  @media (max-width: 620px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
   .about-p { color: var(--dim); max-width: 60ch; }
   .about-p + .about-p { margin-top: 12px; }
   .about-p strong { color: var(--text); font-weight: 600; }
@@ -177,6 +203,50 @@
   .tag {
     font-size: 12.5px; padding: 4px 10px; border-radius: 4px;
     background: #17171c; border: 1px solid var(--line); color: var(--cyan);
+  }
+
+  /* github-style contribution graph */
+  .contrib-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+  .contrib-nav {
+    background: transparent; border: 1px solid var(--line); color: var(--text);
+    border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
+    font-family: var(--mono); font-size: 13px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color 150ms ease, color 150ms ease, opacity 150ms ease;
+  }
+  .contrib-nav:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+  .contrib-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .contrib-year { color: var(--yellow); font-weight: 700; min-width: 4ch; text-align: center; }
+  .contrib-wrap { margin-top: 12px; overflow-x: auto; padding-bottom: 4px; }
+  .contrib-cal { display: inline-flex; flex-direction: column; gap: 5px; }
+  .contrib-months {
+    display: grid; grid-auto-flow: column; gap: 3px;
+    height: 14px; font-size: 11px; color: var(--dim);
+  }
+  .contrib-months span { grid-row: 1; white-space: nowrap; }
+  .contrib-graph {
+    display: grid; grid-auto-flow: column;
+    grid-template-rows: repeat(7, 12px); gap: 3px;
+    width: max-content;
+  }
+  .contrib-cell {
+    width: 12px; height: 12px; border-radius: 2px;
+    background: #17171c; border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .contrib-cell[data-level="1"] { background: rgba(80, 250, 155, 0.28); }
+  .contrib-cell[data-level="2"] { background: rgba(80, 250, 155, 0.5); }
+  .contrib-cell[data-level="3"] { background: rgba(80, 250, 155, 0.75); }
+  .contrib-cell[data-level="4"] { background: var(--green); }
+  .contrib-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px; margin-top: 14px; font-size: 12px; color: var(--dim);
+  }
+  .contrib-total { color: var(--text); }
+  .contrib-total b { color: var(--green); font-weight: 700; }
+  .contrib-legend { display: flex; align-items: center; gap: 4px; }
+  .contrib-legend i {
+    width: 12px; height: 12px; border-radius: 2px; display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.04);
   }
 
   /* projects */
@@ -238,7 +308,7 @@
 <canvas id="particles" aria-hidden="true"></canvas>
 
 <nav class="statusbar" aria-label="Primary">
-  <span class="session">dev@portfolio</span>
+  <span class="session">dev@aldrine</span>
   <a href="#hero">0:~</a>
   <a href="#about">1:about</a>
   <a href="#skills">2:skills</a>
@@ -252,34 +322,41 @@
 <main class="desktop">
 
   <section class="window w-center" id="hero">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">dev@portfolio: ~ — zsh</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">dev@aldrine: ~ — zsh</span></div>
     <div class="body">
-      <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ <span class="cmd">whoami</span></div>
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ <span class="cmd">whoami</span></div>
       <h1 class="hero-name">John Aldrine Lim<span class="accent">_</span></h1>
       <p class="hero-role">// Software Developer — Sta. Rosa, PH</p>
-      <p class="hero-blurb">Placeholder intro — one or two sentences about who you are, what you specialize in, and the kind of problems you enjoy solving.</p>
+      <p class="hero-blurb">$ uv run portfolio.py</p>
+      <div class="focus-cards">
+        <span class="focus-card">AI &amp; Machine Learning</span>
+        <span class="focus-card">Full-Stack Development</span>
+        <span class="focus-card">Software Engineering</span>
+        <span class="focus-card">Game Development</span>
+        <span class="focus-card">Cloud Deployment</span>
+      </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#work">./view-work.sh</a>
         <a class="btn" href="#contact">./contact.sh</a>
       </div>
-      <p style="margin-top: 24px;"><span class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ </span><span class="cursor" aria-hidden="true"></span></p>
+      <p style="margin-top: 24px;"><span class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ </span><span class="cursor" aria-hidden="true"></span></p>
     </div>
   </section>
 
   <section class="window" id="about">
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">about.md — vim</span></div>
     <div class="body">
-      <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ <span class="cmd">cat about.md</span></div>
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ <span class="cmd">cat about.md</span></div>
       <div style="margin-top: 14px;">
         <p class="about-p"><strong># About</strong></p>
         <p class="about-p">I'm a Computer Science student and software developer with an interest in full-stack web development, machine learning, and game development. I enjoy building practical applications that solve real-world problems while writing clean, reliable, and easy-to-maintain code.</p>
         <p class="about-p">Beyond building software, I enjoy continuously learning new technologies, collaborating with others, and sharing knowledge whenever I can. I believe that writing good software is not only about code but also about clear communication, thoughtful design, and continuous improvement.</p>
       </div>
-      <dl class="kv">
-        <dt>location</dt><dd>Placeholder</dd>
-        <dt>experience</dt><dd>X+ years</dd>
-        <dt>focus</dt><dd>full-stack</dd>
-        <dt>status</dt><dd style="color: var(--green);">open to work </dd>
+      <dl class="stats">
+        <div class="stat"><dt class="stat-key">coding</dt><dd class="stat-val">5+ years</dd></div>
+        <div class="stat"><dt class="stat-key">experience</dt><dd class="stat-val">2+ years</dd></div>
+        <div class="stat"><dt class="stat-key">focus</dt><dd class="stat-val">full-stack</dd></div>
+        <div class="stat"><dt class="stat-key">status</dt><dd class="stat-val" style="color: var(--green);">internship @ prosperna</dd></div>
       </dl>
     </div>
   </section>
@@ -287,18 +364,30 @@
   <section class="window w-right" id="skills">
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">skills — ls</span></div>
     <div class="body">
-      <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~/skills</span>$ <span class="cmd">ls -la</span></div>
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~/skills</span>$ <span class="cmd">ls -la</span></div>
       <div class="skill-group">
         <span class="skill-label">drwxr-xr-x frontend/</span>
-        <div class="tags"><span class="tag">placeholder</span><span class="tag">placeholder</span><span class="tag">placeholder</span><span class="tag">placeholder</span></div>
+        <div class="tags"><span class="tag">HTML5</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">Tailwind CSS</span><span class="tag">Bootstrap</span><span class="tag">React</span></div>
       </div>
       <div class="skill-group">
         <span class="skill-label">drwxr-xr-x backend/</span>
-        <div class="tags"><span class="tag">placeholder</span><span class="tag">placeholder</span><span class="tag">placeholder</span><span class="tag">placeholder</span></div>
+        <div class="tags"><span class="tag">Flask</span><span class="tag">ASP.NET</span><span class="tag">Gradio</span><span class="tag">Node.js</span><span class="tag">Express.js</span></div>
+      </div>
+      <div class="skill-group">
+        <span class="skill-label">drwxr-xr-x machine-learning/</span>
+        <div class="tags"><span class="tag">PyTorch</span><span class="tag">scikit-learn</span><span class="tag">NumPy</span><span class="tag">Pandas</span><span class="tag">OpenCV</span><span class="tag">Matplotlib</span><span class="tag">Gradio</span></div>
+      </div>
+      <div class="skill-group">
+        <span class="skill-label">drwxr-xr-x databases/</span>
+        <div class="tags"><span class="tag">PostgreSQL</span><span class="tag">MySQL</span><span class="tag">NoSQL</span></div>
+      </div>
+      <div class="skill-group">
+        <span class="skill-label">drwxr-xr-x cloud-deployment/</span>
+        <div class="tags"><span class="tag">Hugging Face Spaces</span><span class="tag">Render</span><span class="tag">Railway</span><span class="tag">Vercel</span><span class="tag">Supabase Storage</span></div>
       </div>
       <div class="skill-group">
         <span class="skill-label">drwxr-xr-x tools/</span>
-        <div class="tags"><span class="tag">placeholder</span><span class="tag">placeholder</span><span class="tag">placeholder</span><span class="tag">placeholder</span></div>
+        <div class="tags"><span class="tag">GitHub</span><span class="tag">VS Code</span><span class="tag">Visual Studio</span><span class="tag">Postman</span><span class="tag">Figma</span><span class="tag">Docker</span><span class="tag">Unity</span><span class="tag">Supabase</span><span class="tag">MonoGame</span></div>
       </div>
     </div>
   </section>
@@ -306,35 +395,35 @@
   <section class="window w-wide" id="work">
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">~/projects — 4 items</span></div>
     <div class="body">
-      <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~/projects</span>$ <span class="cmd">ls --featured</span></div>
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~/projects</span>$ <span class="cmd">ls --featured</span></div>
       <div class="proj-grid">
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
-          <span class="path">~/projects/project-one</span>
-          <h3><a href="#">project-one ↗</a></h3>
-          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
-          <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
+          <span class="path">(Private Repository)</span>
+          <h3><a>MakiPrint ↗</a></h3>
+          <p>A print-cost estimation web app that analyzes uploaded images to compute CMYK ink coverage and whitespace, then predicts ink usage with a trained neural model — helping print shops quote jobs accurately. Includes role-based access and PDF handling.</p>
+          <div class="tags"><span class="tag">Flask</span><span class="tag">PyTorch</span><span class="tag">NumPy</span><span class="tag">Supabase</span><span class="tag">PostgreSQL</span><span class="tag">Docker</span></div>
         </article>
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
-          <span class="path">~/projects/project-two</span>
-          <h3><a href="#">project-two ↗</a></h3>
-          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
-          <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
+          <span class="path">~/projects/terraprice</span>
+          <h3><a href="https://github.com/dev-aldrine/TerraPrice">TerraPrice ↗</a></h3>
+          <p>An agricultural forecasting tool that predicts food/crop prices from geographic location using regional data, historical trends, and time-series models — giving farmers and planners a data-driven view of upcoming market changes.</p>
+          <div class="tags"><span class="tag">Flask</span><span class="tag">scikit-learn</span><span class="tag">Pandas</span><span class="tag">JavaScript</span></div>
         </article>
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
-          <span class="path">~/projects/project-three</span>
-          <h3><a href="#">project-three ↗</a></h3>
-          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
-          <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
+          <span class="path">~/projects/computer_vision_crosswalk</span>
+          <h3><a href="https://github.com/kamachi-dev/red-light-green-light">Crosswalk CV ↗</a></h3>
+          <p>A computer-vision project for detecting pedestrian crosswalks and activity from camera input, applying image-processing and deep-learning techniques to real-world street scenes.</p>
+          <div class="tags"><span class="tag">Python</span><span class="tag">OpenCV</span><span class="tag">PyTorch</span></div>
         </article>
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
-          <span class="path">~/projects/project-four</span>
-          <h3><a href="#">project-four ↗</a></h3>
-          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
-          <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
+          <span class="path">~/projects/hireswift</span>
+          <h3><a href="https://github.com/dev-aldrine/hireswift_">HireSwift ↗</a></h3>
+          <p>A hiring-automation platform that streamlines candidate screening by using LLMs and NLP to parse resumes and extract key details — skills, experience, and qualifications — so recruiters can shortlist applicants faster and more consistently.</p>
+          <div class="tags"><span class="tag">Python</span><span class="tag">NLP</span><span class="tag">LLM</span><span class="tag">PHP</span><span class="tag">MySQL</span></div>
         </article>
       </div>
     </div>
@@ -343,7 +432,7 @@
   <section class="window" id="experience">
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">career — git log</span></div>
     <div class="body">
-      <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~/career</span>$ <span class="cmd">git log --oneline</span></div>
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~/career</span>$ <span class="cmd">git log --oneline</span></div>
       <div class="log">
         <div class="commit">
           <span class="hash">a3f9c21</span> <span class="ref">(HEAD -&gt; main)</span> <span class="date">2024 — present</span>
@@ -364,14 +453,43 @@
     </div>
   </section>
 
+  <section class="window w-wide" id="activity">
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">contributions — git log --graph</span></div>
+    <div class="body">
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ <span class="cmd">gh api /users/dev-aldrine/contributions</span></div>
+      <div class="contrib-controls">
+        <button class="contrib-nav" id="contrib-prev" aria-label="Previous year">&#9664;</button>
+        <span class="contrib-year" id="contrib-year">····</span>
+        <button class="contrib-nav" id="contrib-next" aria-label="Next year">&#9654;</button>
+      </div>
+      <div class="contrib-wrap">
+        <div class="contrib-cal">
+          <div class="contrib-months" id="contrib-months" aria-hidden="true"></div>
+          <div class="contrib-graph" id="contrib-graph" role="img" aria-label="GitHub contribution graph"></div>
+        </div>
+      </div>
+      <div class="contrib-foot">
+        <span class="contrib-total" id="contrib-total">loading contribution data…</span>
+        <span class="contrib-legend">Less
+          <i style="background:#17171c"></i>
+          <i style="background:rgba(80,250,155,0.28)"></i>
+          <i style="background:rgba(80,250,155,0.5)"></i>
+          <i style="background:rgba(80,250,155,0.75)"></i>
+          <i style="background:var(--green)"></i>
+          More
+        </span>
+      </div>
+    </div>
+  </section>
+
   <section class="window w-center" id="contact">
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">contact — ssh</span></div>
     <div class="body">
-      <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ <span class="cmd">ssh guest@yourdomain.dev</span></div>
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ <span class="cmd">ssh guest@yourdomain.dev</span></div>
       <p class="out contact-line">Connection established. Placeholder — a short line inviting people to reach out for roles, freelance work, or collaboration.</p>
       <div class="contact-links">
         <a class="btn btn-primary" href="mailto:you@example.com">mail --to me</a>
-        <a class="btn" href="#">github</a>
+        <a class="btn" href="https://github.com/dev-aldrine">github</a>
         <a class="btn" href="#">linkedin</a>
       </div>
     </div>
@@ -394,7 +512,7 @@
       return;
     }
     let w, h, particles;
-    const LINK_DIST = 530;
+    const LINK_DIST = 230;
 
     // Orbit-on-hover: particles near a hovered window swirl around it
     const ORBIT_MARGIN = 42;    // ring distance outside the window edge
@@ -667,6 +785,84 @@
     bar.addEventListener("pointerup", release);
     bar.addEventListener("pointercancel", release);
   });
+
+  // GitHub contribution graph — public proxy (no auth token needed), switchable by year
+  (() => {
+    const USER = "dev-aldrine";
+    const graph = document.getElementById("contrib-graph");
+    const monthsEl = document.getElementById("contrib-months");
+    const totalEl = document.getElementById("contrib-total");
+    const yearEl = document.getElementById("contrib-year");
+    const prevBtn = document.getElementById("contrib-prev");
+    const nextBtn = document.getElementById("contrib-next");
+    if (!graph) return;
+
+    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const CURRENT = new Date().getFullYear();
+    let year = CURRENT;
+    const cache = {};
+
+    function render(days) {
+      graph.innerHTML = "";
+      monthsEl.innerHTML = "";
+      const firstOffset = new Date(days[0].date + "T00:00:00Z").getUTCDay(); // 0=Sun
+      let total = 0, lastMonthCol = -1;
+      const numCols = Math.ceil((days.length + firstOffset) / 7);
+      monthsEl.style.gridTemplateColumns = `repeat(${numCols}, 12px)`;
+
+      days.forEach((d, i) => {
+        total += d.count || 0;
+        const col = Math.floor((i + firstOffset) / 7); // 0-based week column
+        const cell = document.createElement("div");
+        cell.className = "contrib-cell";
+        cell.dataset.level = d.level;
+        cell.title = `${d.count} contribution${d.count === 1 ? "" : "s"} on ${d.date}`;
+        if (i === 0) cell.style.gridRow = firstOffset + 1;
+        graph.appendChild(cell);
+
+        // place a month label at the first column that lands in a new month
+        const m = new Date(d.date + "T00:00:00Z").getUTCMonth();
+        if (col !== lastMonthCol && (i === 0 || new Date(days[i - 1].date + "T00:00:00Z").getUTCMonth() !== m)) {
+          const label = document.createElement("span");
+          label.textContent = MONTHS[m];
+          label.style.gridColumn = `${col + 1} / span 4`;
+          monthsEl.appendChild(label);
+          lastMonthCol = col;
+        }
+      });
+
+      totalEl.innerHTML = `<b>${total.toLocaleString()}</b> contributions in ${year}`;
+    }
+
+    function load(y) {
+      year = y;
+      yearEl.textContent = y;
+      nextBtn.disabled = y >= CURRENT;
+      graph.style.opacity = "0.4";
+      if (cache[y]) { graph.style.opacity = "1"; render(cache[y]); return; }
+      totalEl.textContent = "loading…";
+      fetch(`https://github-contributions-api.jogruber.de/${"v4"}/${USER}?y=${y}`)
+        .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then((data) => {
+          const days = data.contributions || [];
+          if (!days.length) throw new Error("no data");
+          cache[y] = days;
+          graph.style.opacity = "1";
+          render(days);
+        })
+        .catch(() => {
+          graph.style.opacity = "1";
+          graph.innerHTML = "";
+          monthsEl.innerHTML = "";
+          totalEl.innerHTML =
+            `no data for ${y} — <a href="https://github.com/${USER}">view on GitHub ↗</a>`;
+        });
+    }
+
+    prevBtn.addEventListener("click", () => load(year - 1));
+    nextBtn.addEventListener("click", () => load(year + 1));
+    load(CURRENT);
+  })();
 </script>
 
 </body>
