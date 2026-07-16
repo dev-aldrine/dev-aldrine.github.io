@@ -6,12 +6,12 @@
 <title>dev@portfolio: ~</title>
 <style>
   :root {
-    --desk: #050506;
+    --desk: #ffffff;
     --win: #0e0e11;
     --win-header: #161619;
     --line: #232328;
     --text: #dcdee3;
-    --dim: #83878f;
+    --dim: #b9babb;
     --green: #50fa9b;
     --cyan: #6fd3ff;
     --yellow: #f5d67b;
@@ -22,13 +22,13 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #2c2c33 transparent; }
+  html {
+    scroll-behavior: smooth;
+    -ms-overflow-style: none; /* IE/legacy Edge */
+  }
 
-  /* minimal scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2c2c33; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3f3f48; }
+  /* fully hide the native scrollbar — scrolling still works via wheel/trackpad/keys/drag */
+  ::-webkit-scrollbar { width: 0; height: 0; display: none; }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -246,18 +246,18 @@
   <a href="#experience">4:log</a>
   <a href="#contact">5:contact</a>
   <span class="spacer"></span>
-  <span class="clock">zsh Â· draft-0.2</span>
+  <span class="clock">zsh · draft-0.2</span>
 </nav>
 
 <main class="desktop">
 
   <section class="window w-center" id="hero">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">dev@portfolio: ~ â€” zsh</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">dev@portfolio: ~ — zsh</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ <span class="cmd">whoami</span></div>
-      <h1 class="hero-name">Your Name<span class="accent">_</span></h1>
-      <p class="hero-role">// Software Developer â€” Placeholder City, PH</p>
-      <p class="hero-blurb">Placeholder intro â€” one or two sentences about who you are, what you specialize in, and the kind of problems you enjoy solving.</p>
+      <h1 class="hero-name">John Aldrine Lim<span class="accent">_</span></h1>
+      <p class="hero-role">// Software Developer — Sta. Rosa, PH</p>
+      <p class="hero-blurb">Placeholder intro — one or two sentences about who you are, what you specialize in, and the kind of problems you enjoy solving.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#work">./view-work.sh</a>
         <a class="btn" href="#contact">./contact.sh</a>
@@ -267,25 +267,25 @@
   </section>
 
   <section class="window" id="about">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">about.md â€” vim</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">about.md — vim</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ <span class="cmd">cat about.md</span></div>
       <div style="margin-top: 14px;">
         <p class="about-p"><strong># About</strong></p>
-        <p class="about-p">Placeholder paragraph â€” your background: how you got into software, what you've focused on, and what you're doing now.</p>
-        <p class="about-p">Second placeholder paragraph â€” what you care about outside of shipping code: mentoring, open source, design, writing.</p>
+        <p class="about-p">I'm a Computer Science student and software developer with an interest in full-stack web development, machine learning, and game development. I enjoy building practical applications that solve real-world problems while writing clean, reliable, and easy-to-maintain code.</p>
+        <p class="about-p">Beyond building software, I enjoy continuously learning new technologies, collaborating with others, and sharing knowledge whenever I can. I believe that writing good software is not only about code but also about clear communication, thoughtful design, and continuous improvement.</p>
       </div>
       <dl class="kv">
         <dt>location</dt><dd>Placeholder</dd>
         <dt>experience</dt><dd>X+ years</dd>
         <dt>focus</dt><dd>full-stack</dd>
-        <dt>status</dt><dd style="color: var(--green);">open to work â—</dd>
+        <dt>status</dt><dd style="color: var(--green);">open to work </dd>
       </dl>
     </div>
   </section>
 
   <section class="window w-right" id="skills">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">skills â€” ls</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">skills — ls</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~/skills</span>$ <span class="cmd">ls -la</span></div>
       <div class="skill-group">
@@ -304,36 +304,36 @@
   </section>
 
   <section class="window w-wide" id="work">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">~/projects â€” 4 items</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">~/projects — 4 items</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~/projects</span>$ <span class="cmd">ls --featured</span></div>
       <div class="proj-grid">
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
           <span class="path">~/projects/project-one</span>
-          <h3><a href="#">project-one â†—</a></h3>
-          <p>Placeholder description â€” what the project does, the problem it solves, and your role in building it.</p>
+          <h3><a href="#">project-one ↗</a></h3>
+          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
           <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
         </article>
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
           <span class="path">~/projects/project-two</span>
-          <h3><a href="#">project-two â†—</a></h3>
-          <p>Placeholder description â€” what the project does, the problem it solves, and your role in building it.</p>
+          <h3><a href="#">project-two ↗</a></h3>
+          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
           <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
         </article>
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
           <span class="path">~/projects/project-three</span>
-          <h3><a href="#">project-three â†—</a></h3>
-          <p>Placeholder description â€” what the project does, the problem it solves, and your role in building it.</p>
+          <h3><a href="#">project-three ↗</a></h3>
+          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
           <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
         </article>
         <article class="proj">
           <div class="thumb">[ project screenshot ]</div>
           <span class="path">~/projects/project-four</span>
-          <h3><a href="#">project-four â†—</a></h3>
-          <p>Placeholder description â€” what the project does, the problem it solves, and your role in building it.</p>
+          <h3><a href="#">project-four ↗</a></h3>
+          <p>Placeholder description — what the project does, the problem it solves, and your role in building it.</p>
           <div class="tags"><span class="tag">stack</span><span class="tag">stack</span><span class="tag">stack</span></div>
         </article>
       </div>
@@ -341,34 +341,34 @@
   </section>
 
   <section class="window" id="experience">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">career â€” git log</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">career — git log</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~/career</span>$ <span class="cmd">git log --oneline</span></div>
       <div class="log">
         <div class="commit">
-          <span class="hash">a3f9c21</span> <span class="ref">(HEAD -&gt; main)</span> <span class="date">2024 â€” present</span>
+          <span class="hash">a3f9c21</span> <span class="ref">(HEAD -&gt; main)</span> <span class="date">2024 — present</span>
           <h3>Job Title @ Company Name</h3>
-          <p>Placeholder â€” one or two lines on what you built, shipped, or improved in this role, with a concrete result.</p>
+          <p>Placeholder — one or two lines on what you built, shipped, or improved in this role, with a concrete result.</p>
         </div>
         <div class="commit">
-          <span class="hash">7be04d8</span> <span class="date">2022 â€” 2024</span>
+          <span class="hash">7be04d8</span> <span class="date">2022 — 2024</span>
           <h3>Job Title @ Company Name</h3>
-          <p>Placeholder â€” one or two lines on what you built, shipped, or improved in this role, with a concrete result.</p>
+          <p>Placeholder — one or two lines on what you built, shipped, or improved in this role, with a concrete result.</p>
         </div>
         <div class="commit">
-          <span class="hash">1c8aa02</span> <span class="ref">(tag: first-job)</span> <span class="date">2020 â€” 2022</span>
+          <span class="hash">1c8aa02</span> <span class="ref">(tag: first-job)</span> <span class="date">2020 — 2022</span>
           <h3>Job Title @ Company Name</h3>
-          <p>Placeholder â€” one or two lines on what you built, shipped, or improved in this role, with a concrete result.</p>
+          <p>Placeholder — one or two lines on what you built, shipped, or improved in this role, with a concrete result.</p>
         </div>
       </div>
     </div>
   </section>
 
   <section class="window w-center" id="contact">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">contact â€” ssh</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">contact — ssh</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@portfolio</span>:<span class="p">~</span>$ <span class="cmd">ssh guest@yourdomain.dev</span></div>
-      <p class="out contact-line">Connection established. Placeholder â€” a short line inviting people to reach out for roles, freelance work, or collaboration.</p>
+      <p class="out contact-line">Connection established. Placeholder — a short line inviting people to reach out for roles, freelance work, or collaboration.</p>
       <div class="contact-links">
         <a class="btn btn-primary" href="mailto:you@example.com">mail --to me</a>
         <a class="btn" href="#">github</a>
@@ -380,8 +380,8 @@
 </main>
 
 <footer aria-hidden="true">
-  <span><span class="mode">-- NORMAL --</span>&nbsp; Â© 2026 Your Name Â· draft</span>
-  <span>utf-8 Â· unix Â· 100%</span>
+  <span><span class="mode">-- NORMAL --</span>&nbsp; © 2026 Your Name · draft</span>
+  <span>utf-8 · unix · 100%</span>
 </footer>
 
 <script>
@@ -394,7 +394,7 @@
       return;
     }
     let w, h, particles;
-    const LINK_DIST = 140;
+    const LINK_DIST = 530;
 
     // Orbit-on-hover: particles near a hovered window swirl around it
     const ORBIT_MARGIN = 42;    // ring distance outside the window edge
@@ -410,7 +410,7 @@
     function init() {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
-      const count = Math.min(70, Math.floor((w * h) / 22000));
+      const count = Math.min(55, Math.floor((w * h) / 28000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -432,7 +432,7 @@
         ory = r.height / 2 + ORBIT_MARGIN;
       }
 
-      ctx.shadowColor = "rgba(80, 250, 155, 0.9)";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
       ctx.shadowBlur = 6;
       for (const p of particles) {
         let influenced = false;
@@ -484,9 +484,9 @@
         p.x += p.vx; p.y += p.vy;
         if (p.x < 0 || p.x > w) p.vx *= -1;
         if (p.y < 0 || p.y > h) p.vy *= -1;
-        ctx.fillStyle = "rgba(160, 255, 200, 0.5)";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.shadowBlur = 4;
@@ -508,8 +508,8 @@
           }
           if (d2 < LINK_DIST * LINK_DIST) {
             const alpha = 0.16 * (1 - Math.sqrt(d2) / LINK_DIST);
-            ctx.strokeStyle = `rgba(80, 250, 155, ${alpha})`;
-            ctx.lineWidth = 1.6;
+            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.lineWidth = 2.6;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
@@ -593,10 +593,10 @@
         const p3 = 3.4 / (3.4 + z2);
         pts.push([cx + x1 * scale * p3, cy + y1 * scale * p3]);
       }
-      ctx.shadowColor = "rgba(80, 250, 155, 0.8)";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
       ctx.shadowBlur = 12;
-      ctx.strokeStyle = "rgba(80, 250, 155, 0.16)";
-      ctx.lineWidth = 2.8;
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.28)";
+      ctx.lineWidth = 4;
       ctx.beginPath();
       for (const [a, b] of E) {
         ctx.moveTo(pts[a][0], pts[a][1]);
@@ -604,10 +604,10 @@
       }
       ctx.stroke();
       // brighten the corners
-      ctx.fillStyle = "rgba(160, 255, 200, 0.35)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
       for (const [x, y] of pts) {
         ctx.beginPath();
-        ctx.arc(x, y, 1.6, 0, Math.PI * 2);
+        ctx.arc(x, y, 2.8, 0, Math.PI * 2);
         ctx.fill();
       }
       requestAnimationFrame(tick);
