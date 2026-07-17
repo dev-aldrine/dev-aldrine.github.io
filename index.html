@@ -1,4 +1,62 @@
-﻿<!doctype html>
+﻿<!--
+ ░██                                       
+░██                                       
+░██ ░█████████████   ░██████    ░███████  
+░██ ░██   ░██   ░██       ░██  ░██    ░██ 
+░██ ░██   ░██   ░██  ░███████  ░██    ░██ 
+░██ ░██   ░██   ░██ ░██   ░██  ░██    ░██ 
+░██ ░██   ░██   ░██  ░█████░██  ░███████   
+
+
+
+
+
+
+
+
+
+
+
+Why is bro checking this out?
+
+-->
+                                          
+                                          
+                                          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -7,8 +65,8 @@
 <title>dev@aldrine: ~</title>
 <style>
   :root {
-    --desk: #ffffff;
-    --win: #0e0e11;
+    --desk: #2a2a2e;
+    --win: #2c2c2c;
     --win-header: #161619;
     --line: #232328;
     --text: #dcdee3;
@@ -47,8 +105,9 @@
   a:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
   ::selection { background: rgba(80, 250, 155, 0.25); }
 
-  #particles, #cube {
+  #tiles {
     position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    width: 100%; height: 100%;
   }
 
   /* tmux-style top bar */
@@ -519,8 +578,7 @@
 </head>
 <body>
 
-<canvas id="cube" aria-hidden="true"></canvas>
-<canvas id="particles" aria-hidden="true"></canvas>
+<canvas id="tiles" aria-hidden="true"></canvas>
 
 <nav class="statusbar" aria-label="Primary">
   <span class="session">dev@aldrine</span>
@@ -907,52 +965,27 @@
 </footer>
 
 <script>
-  // Theme — dark at the top, and once you cross the halfway mark it eases over to
-  // light on its own clock (not glued to the scrollbar). Publishes window.__ink so
-  // the canvases flip colour with it and never disappear into the background.
+  // Easter egg — same greeting as the view-source art, for the devtools crowd
   (() => {
-    const BG_DARK = [5, 5, 6], BG_LIGHT = [255, 255, 255];
-    const INK_DARK = [216, 228, 238];   // ink while the page is dark
-    const INK_LIGHT = [0, 0, 0];        // ink once the page is light
-    const root = document.documentElement;
-    const blend = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    const art = [
+      " ░██                                       ",
+      "░██                                       ",
+      "░██ ░█████████████   ░██████    ░███████  ",
+      "░██ ░██   ░██   ░██       ░██  ░██    ░██ ",
+      "░██ ░██   ░██   ░██  ░███████  ░██    ░██ ",
+      "░██ ░██   ░██   ░██ ░██   ░██  ░██    ░██ ",
+      "░██ ░██   ░██   ░██  ░█████░██  ░███████  ",
+    ].join("\n");
 
-    let m = 0;          // current position of the fade, 0 = dark, 1 = light
-    let target = 0;     // where it's heading
-    let raf = null;
-    window.__ink = INK_DARK;
-
-    function apply() {
-      root.style.setProperty("--desk", `rgb(${blend(BG_DARK, BG_LIGHT, m).join(",")})`);
-      window.__ink = blend(INK_DARK, INK_LIGHT, m);
-    }
-
-    function run() {
-      m += (target - m) * 0.022;                // exponential ease toward the target
-      if (Math.abs(target - m) < 0.002) {       // settled — stop burning frames
-        m = target;
-        apply();
-        raf = null;
-        return;
-      }
-      apply();
-      raf = requestAnimationFrame(run);
-    }
-
-    function onScroll() {
-      const maxScroll = root.scrollHeight - window.innerHeight;
-      if (maxScroll <= 0) return;
-      const p = window.scrollY / maxScroll;
-      // 4% deadband around the midpoint, so parking right on the line can't flicker
-      if (p >= 0.52) target = 1;
-      else if (p <= 0.48) target = 0;
-      if (raf === null && m !== target) raf = requestAnimationFrame(run);
-    }
-
-    apply();
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    console.log(`%c${art}`, "color:#50fa9b; font-family:monospace; line-height:1.1;");
+    console.log(
+      "%cWhy is bro checking this out?",
+      "color:#f5d67b; font-family:monospace; font-size:14px; font-weight:700;"
+    );
+    console.log(
+      "%c…since you're here: github.com/dev-aldrine",
+      "color:#6fd3ff; font-family:monospace;"
+    );
   })();
 
   // Hero name — letters flicker through diacritic variants of themselves, then snap back
@@ -1017,271 +1050,6 @@
     }, 1100);
   })();
 
-  // Minimal particle network background
-  (() => {
-    const canvas = document.getElementById("particles");
-    const ctx = canvas.getContext("2d");
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      canvas.remove();
-      return;
-    }
-    let w, h, particles;
-    const LINK_DIST = 230;
-
-    // Orbit-on-hover: particles near a hovered window swirl around it
-    const ORBIT_MARGIN = 42;    // ring distance outside the window edge
-    const ORBIT_CAPTURE = 260;  // how far away particles get recruited from
-    const ORBIT_PULL = 0.012;   // attraction strength toward the ring
-    const ORBIT_SPIN = 0.055;   // tangential (circling) acceleration
-    let hoverEl = null;
-    document.querySelectorAll(".window, .proj").forEach((el) => {
-      el.addEventListener("mouseenter", () => { hoverEl = el; });
-      el.addEventListener("mouseleave", () => { if (hoverEl === el) hoverEl = null; });
-    });
-
-    function init() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-      const count = Math.min(55, Math.floor((w * h) / 28000));
-      particles = Array.from({ length: count }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-      }));
-    }
-
-    function tick() {
-      ctx.clearRect(0, 0, w, h);
-
-      // hovered card geometry (recomputed each frame — cards float and drag)
-      let ocx, ocy, orx, ory;
-      if (hoverEl) {
-        const r = hoverEl.getBoundingClientRect();
-        ocx = r.left + r.width / 2;
-        ocy = r.top + r.height / 2;
-        orx = r.width / 2 + ORBIT_MARGIN;
-        ory = r.height / 2 + ORBIT_MARGIN;
-      }
-
-      const ink = window.__ink || [0, 0, 0];
-      const INK = ink.join(", ");
-      ctx.shadowColor = `rgba(${INK}, 0.4)`;
-      ctx.shadowBlur = 6;
-      for (const p of particles) {
-        let influenced = false;
-        if (hoverEl) {
-          const dx = p.x - ocx, dy = p.y - ocy;
-          const edge = Math.max(Math.abs(dx) - orx, Math.abs(dy) - ory);
-          if (edge < ORBIT_CAPTURE) {
-            influenced = true;
-            // rectangular ring bounds
-            const L = ocx - orx, R = ocx + orx, T = ocy - ory, B = ocy + ory;
-            // nearest point on the rectangle's perimeter + outward normal
-            let tx, ty, nx, ny;
-            if (Math.abs(dx) > orx || Math.abs(dy) > ory) {
-              // outside: clamp to the ring
-              tx = Math.min(Math.max(p.x, L), R);
-              ty = Math.min(Math.max(p.y, T), B);
-              const ddx = p.x - tx, ddy = p.y - ty;
-              const dd = Math.hypot(ddx, ddy) || 1;
-              nx = ddx / dd; ny = ddy / dd;
-            } else {
-              // inside: push out through the closest edge
-              const toL = p.x - L, toR = R - p.x, toT = p.y - T, toB = B - p.y;
-              const m = Math.min(toL, toR, toT, toB);
-              if (m === toL)      { tx = L; ty = p.y; nx = -1; ny = 0; }
-              else if (m === toR) { tx = R; ty = p.y; nx = 1;  ny = 0; }
-              else if (m === toT) { tx = p.x; ty = T; nx = 0;  ny = -1; }
-              else                { tx = p.x; ty = B; nx = 0;  ny = 1; }
-            }
-            // pull onto the rectangular ring
-            p.vx += (tx - p.x) * ORBIT_PULL;
-            p.vy += (ty - p.y) * ORBIT_PULL;
-            // tangential push along the perimeter (counterclockwise), strongest on the ring
-            const distRing = Math.hypot(p.x - tx, p.y - ty);
-            const grip = Math.max(0, 1 - distRing / 60);
-            p.vx += -ny * ORBIT_SPIN * grip;
-            p.vy += nx * ORBIT_SPIN * grip;
-            // damping so captured particles settle instead of oscillating
-            p.vx *= 0.965; p.vy *= 0.965;
-          }
-        }
-        // when released from an orbit, gently bleed off excess speed back to drift
-        if (!influenced) {
-          const sp = Math.hypot(p.vx, p.vy);
-          if (sp > 0.35) {
-            const f = Math.max(0.35 / sp, 0.9);
-            p.vx *= f; p.vy *= f;
-          }
-        }
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
-        ctx.fillStyle = `rgba(${INK}, 0.75)`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.shadowBlur = 4;
-      const REPEL_DIST = 70;   // particles closer than this gently push apart
-      const REPEL_FORCE = 0.012;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i], b = particles[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const d2 = dx * dx + dy * dy;
-          // soft mutual repulsion (skipped while orbiting a card) so the
-          // field spreads back out evenly after an orbit disperses
-          if (!hoverEl && d2 > 0.01 && d2 < REPEL_DIST * REPEL_DIST) {
-            const d = Math.sqrt(d2);
-            const f = REPEL_FORCE * (1 - d / REPEL_DIST);
-            const ux = dx / d, uy = dy / d;
-            a.vx += ux * f; a.vy += uy * f;
-            b.vx -= ux * f; b.vy -= uy * f;
-          }
-          if (d2 < LINK_DIST * LINK_DIST) {
-            const alpha = 0.16 * (1 - Math.sqrt(d2) / LINK_DIST);
-            ctx.strokeStyle = `rgba(${INK}, ${alpha})`;
-            ctx.lineWidth = 2.6;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        }
-      }
-      requestAnimationFrame(tick);
-    }
-
-    init();
-    window.addEventListener("resize", init);
-    requestAnimationFrame(tick);
-  })();
-
-  // Subtle wireframe tesseract — spins faster while scrolling
-  // Size as a fraction of the smaller viewport side (0.13 was the old default)
-  const TESSERACT_SIZE = 0.04;
-  (() => {
-    const canvas = document.getElementById("cube");
-    const ctx = canvas.getContext("2d");
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      canvas.remove();
-      return;
-    }
-    let w, h;
-    function size() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
-    size();
-    window.addEventListener("resize", size);
-
-    // Tesseract: 16 vertices of (±1,±1,±1,±1), edges join vertices differing in one coord
-    const V = [];
-    for (let i = 0; i < 16; i++) {
-      V.push([i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1, i & 8 ? 1 : -1]);
-    }
-    const E = [];
-    for (let i = 0; i < 16; i++) {
-      for (const bit of [1, 2, 4, 8]) {
-        const j = i ^ bit;
-        if (i < j) E.push([i, j]);
-      }
-    }
-    let rx = 0.4, ry = 0.2, boost = 0, boostTarget = 0, lastScroll = window.scrollY;
-
-    // The tesseract traces a continuous path as the page scrolls — a Lissajous
-    // curve, so x and y sweep at different rates and it never retraces itself.
-    // SWEEP_X/Y = how many times each axis oscillates over the whole page.
-    const SWEEP_X = 1.5, SWEEP_Y = 2.5;
-    const AMP_X = 0.32, AMP_Y = 0.22;   // travel range, as a fraction of viewport
-    const MID_X = 0.5, MID_Y = 0.45;    // centre of the path
-
-    // The tesseract chases that path on a spring rather than snapping to it, so it
-    // lags behind the scroll, eases in, and drifts past slightly before settling.
-    // Critical damping here would be 2*sqrt(K) ≈ 8.5 — D is deliberately under that
-    // to leave a little overshoot, which is what stops it reading as linear.
-    const SPRING_K = 18, SPRING_D = 5.5;
-    let px = null, py = null;           // current position (null until first frame)
-    let pvx = 0, pvy = 0;               // current velocity
-    let lastT = performance.now();
-
-    window.addEventListener("scroll", () => {
-      boostTarget = Math.min(boostTarget + Math.abs(window.scrollY - lastScroll) * 0.00008, 0.03);
-      lastScroll = window.scrollY;
-    }, { passive: true });
-
-    function tick() {
-      // ease boost toward its target, then let the target decay — smooth ramp up and down
-      boost += (boostTarget - boost) * 0.06;
-      boostTarget *= 0.97;
-      const speed = 0.0025 + boost;
-      rx += speed * 0.7;
-      ry += speed;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // position follows scroll continuously along the path
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const prog = maxScroll > 0 ? Math.min(Math.max(window.scrollY / maxScroll, 0), 1) : 0;
-      const tx = (MID_X + AMP_X * Math.cos(prog * Math.PI * 2 * SWEEP_X)) * w;
-      const ty = (MID_Y + AMP_Y * Math.sin(prog * Math.PI * 2 * SWEEP_Y)) * h;
-      if (px === null) { px = tx; py = ty; }      // start in place, don't fly in
-
-      // spring toward the scroll target (dt-based so it feels the same at any refresh rate)
-      const nowT = performance.now();
-      const dt = Math.min((nowT - lastT) / 1000, 0.032);
-      lastT = nowT;
-      pvx += (-SPRING_K * (px - tx) - SPRING_D * pvx) * dt;
-      pvy += (-SPRING_K * (py - ty) - SPRING_D * pvy) * dt;
-      px += pvx * dt;
-      py += pvy * dt;
-
-      const cx = px, cy = py;
-      const scale = Math.min(w, h) * TESSERACT_SIZE;
-      const cA = Math.cos(rx), sA = Math.sin(rx);   // XW plane (4D)
-      const cB = Math.cos(ry), sB = Math.sin(ry);   // YZ plane (4D)
-      const cY = Math.cos(ry * 0.6), sY = Math.sin(ry * 0.6); // 3D yaw
-      const cX = Math.cos(rx * 0.5), sX = Math.sin(rx * 0.5); // 3D pitch
-
-      const pts = [];
-      for (const [x0, y0, z0, w0] of V) {
-        // 4D double rotation: XW and YZ planes
-        let x = x0 * cA - w0 * sA, wv = x0 * sA + w0 * cA;
-        let y = y0 * cB - z0 * sB, z = y0 * sB + z0 * cB;
-        // project 4D -> 3D
-        const p4 = 2.6 / (2.6 - wv);
-        x *= p4; y *= p4; z *= p4;
-        // 3D spin so it doesn't sit face-on
-        let x1 = x * cY + z * sY, z1 = -x * sY + z * cY;
-        let y1 = y * cX - z1 * sX, z2 = y * sX + z1 * cX;
-        // project 3D -> 2D
-        const p3 = 3.4 / (3.4 + z2);
-        pts.push([cx + x1 * scale * p3, cy + y1 * scale * p3]);
-      }
-      const INK = (window.__ink || [0, 0, 0]).join(", ");
-      ctx.shadowColor = `rgba(${INK}, 0.35)`;
-      ctx.shadowBlur = 12;
-      ctx.strokeStyle = `rgba(${INK}, 0.28)`;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      for (const [a, b] of E) {
-        ctx.moveTo(pts[a][0], pts[a][1]);
-        ctx.lineTo(pts[b][0], pts[b][1]);
-      }
-      ctx.stroke();
-      // brighten the corners
-      ctx.fillStyle = `rgba(${INK}, 0.7)`;
-      for (const [x, y] of pts) {
-        ctx.beginPath();
-        ctx.arc(x, y, 2.8, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  })();
 
   // Drag windows by their title bar (desktop only) — elastic spring back on release
   const canDrag = () => window.matchMedia("(min-width: 861px)").matches;
@@ -1603,6 +1371,184 @@
     prevBtn.addEventListener("click", () => load(year - 1));
     nextBtn.addEventListener("click", () => load(year + 1));
     load(CURRENT);
+  })();
+</script>
+
+<script type="module">
+  /*
+   * Flipping-tiles background.
+   * Adapted from Noel Delgado's pen (https://codepen.io/noeldelgado/pen/QwWRwg),
+   * rewritten for modern three.js — the original used THREE.Geometry/FaceColors,
+   * setClearColorHex, shadowMapEnabled and GSAP, all of which are gone or avoided
+   * here. The elastic easing is hand-rolled so GSAP isn't needed.
+   */
+  // Imported by full URL rather than a bare "three" specifier: Vite (the dev server)
+  // resolves bare specifiers from node_modules and ignores browser import maps, but
+  // it leaves absolute URLs alone — so this works in `vite dev` and on GitHub Pages
+  // alike, with nothing to npm install.
+  import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+
+  (() => {
+    const canvas = document.getElementById("tiles");
+    if (!canvas) return;
+
+    /* ┌──────────────────────────────────────────────────────────────────┐
+       │  TWEAK ME — everything about the background is driven from here  │
+       └──────────────────────────────────────────────────────────────────┘ */
+    const CONFIG = {
+      tileSize:      155,   // how big each flipping tile is
+      gridSize:       9,   // tiles per side — total tiles = gridSize² (12 → 144)
+      platformScale: 1.0,   // platform/walls vs. the tile field. 1 = snug, 1.5 = wide border
+      zoom:         1250,   // camera distance. LOWER = closer/bigger. Raise to see more
+      fov:            25,   // lens angle. Higher = wider + more dramatic perspective
+
+      tilt:          -30,   // platform pitch, degrees (-60 = the classic isometric lean)
+      spin:          -45,   // platform rotation, degrees
+      lift:           50,   // nudges the whole platform up/down on screen
+
+      minFlip:         6,   // fastest a tile flips, in seconds
+      maxFlip:         6,   // slowest a tile flips
+      maxStagger:      10,   // spread of start times — bigger = less synchronised
+
+      color:    0xffffff,   // tile / wall / floor colour
+    };
+    /* ────────────────────────────────────────────────────────────────── */
+
+    const PI = Math.PI;
+    const DEG = PI / 180;
+    const TILE = CONFIG.tileSize;
+    const GRID = CONFIG.gridSize;
+    const TOTAL = GRID * GRID;
+    const SPAN = GRID * TILE;              // extent of the tile field itself
+    const HALF_SPAN = SPAN / 2;
+    const WALL = SPAN * CONFIG.platformScale;  // extent of the platform/box
+    const HALF = WALL / 2;
+    const MAIN = CONFIG.color;
+    const rand = (min, max) => Math.random() * (max - min) + min;
+
+    let w = window.innerWidth, h = window.innerHeight;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(w, h, false);
+    renderer.setClearColor(0x000000, 0);   // transparent — the page theme shows through
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const camera = new THREE.PerspectiveCamera(CONFIG.fov, w / h, 0.1, 20000);
+    // Close relative to WALL, so the platform overflows the viewport and covers it
+    // edge to edge rather than sitting as an island in the middle.
+    camera.position.set(0, 0, CONFIG.zoom);
+
+    const scene = new THREE.Scene();
+    const group = new THREE.Object3D();
+
+    // --- the open box the tiles sit in ---
+    const wallGeo = new THREE.PlaneGeometry(WALL, WALL);
+    const wallMat = new THREE.MeshLambertMaterial({ color: MAIN, side: THREE.DoubleSide });
+    const walls = [
+      { pos: [0, HALF, -HALF],  rot: [PI / 2, 0, 0] },   // back
+      { pos: [HALF, 0, -HALF],  rot: [0, -PI / 2, 0] },  // right
+      { pos: [0, -HALF, -HALF], rot: [-PI / 2, 0, 0] },  // front
+      { pos: [-HALF, 0, -HALF], rot: [0, PI / 2, 0] },   // left
+      { pos: [0, 0, -WALL],     rot: [0, 0, 0] },        // bottom
+    ];
+    for (const { pos, rot } of walls) {
+      const m = new THREE.Mesh(wallGeo, wallMat);
+      m.position.set(...pos);
+      m.rotation.set(...rot);
+      m.receiveShadow = true;
+      group.add(m);
+    }
+
+    // --- floor tiles ringing the grid ---
+    const floorMat = new THREE.MeshLambertMaterial({ color: MAIN });
+    for (const [fx, fy] of [[-1,1],[0,1],[1,1],[-1,0],[1,0],[-1,-1],[0,-1],[1,-1]]) {
+      const t = new THREE.Mesh(wallGeo, floorMat);
+      t.position.set(fx * WALL, fy * WALL, 0);
+      t.receiveShadow = true;
+      group.add(t);
+    }
+
+    // --- the flipping tiles ---
+    const tileGeo = new THREE.BoxGeometry(TILE, TILE, 0.05);
+    const tileMat = new THREE.MeshLambertMaterial({ color: MAIN });
+    const tiles = [];
+    for (let i = 0; i < TOTAL; i++) {
+      const col = i % GRID, row = Math.floor(i / GRID);
+      const t = new THREE.Mesh(tileGeo, tileMat);
+      // centred on the tile field (SPAN), independent of how big the platform is
+      t.position.set(
+        -(HALF_SPAN - TILE * (col + 1) + TILE / 2),
+        -(HALF_SPAN - TILE * (row + 1) + TILE / 2),
+        0
+      );
+      t.castShadow = true;
+      t.receiveShadow = true;
+      t.userData = {
+        axis: Math.random() < 0.5 ? "x" : "y",
+        dir: Math.random() < 0.5 ? -PI : PI,
+        dur: rand(CONFIG.minFlip, CONFIG.maxFlip),
+        start: -rand(0.5, CONFIG.maxStagger),   // negative = staggered head start
+      };
+      tiles.push(t);
+      group.add(t);
+    }
+
+    // --- lights ---
+    const key = new THREE.DirectionalLight(MAIN, 2.2);
+    key.position.set(-WALL, -WALL, SPAN);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);  // bigger grid needs more shadow resolution
+    Object.assign(key.shadow.camera, {
+      left: -WALL, right: WALL, top: WALL, bottom: -WALL,
+      near: 1, far: WALL * 4,            // scales with the platform, not hard-coded
+    });
+    key.shadow.camera.updateProjectionMatrix();
+    const fill = new THREE.DirectionalLight(MAIN, 1.4);
+    fill.position.set(WALL, WALL, SPAN);
+    group.add(key, fill);
+    scene.add(new THREE.AmbientLight(MAIN, 0.6));
+
+    group.position.y = CONFIG.lift;
+    group.rotation.set(CONFIG.tilt * DEG, 0, CONFIG.spin * DEG);
+    scene.add(group);
+
+    // GSAP's Elastic.easeOut, by hand (amplitude 1, period 0.3)
+    function elasticOut(t) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      const p = 0.3, s = p / 4;
+      return Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * PI)) / p) + 1;
+    }
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t0 = performance.now();
+
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function render() {
+      if (!reduced) {
+        const elapsed = (performance.now() - t0) / 1000;
+        for (const t of tiles) {
+          const { axis, dir, dur, start } = t.userData;
+          const k = ((elapsed - start) / dur) % 1;
+          // each cycle rotates a half-turn; the tile is square, so the reset is invisible
+          t.rotation[axis] = dir * elasticOut(k);
+        }
+      }
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
   })();
 </script>
 
