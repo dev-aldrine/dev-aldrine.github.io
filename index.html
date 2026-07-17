@@ -11,7 +11,7 @@
     --win-header: #161619;
     --line: #232328;
     --text: #dcdee3;
-    --dim: #b9babb;
+    --dim: #ffffff;
     --green: #50fa9b;
     --cyan: #6fd3ff;
     --yellow: #f5d67b;
@@ -205,6 +205,41 @@
     background: #17171c; border: 1px solid var(--line); color: var(--cyan);
   }
 
+  /* certificates carousel */
+  .carousel { margin-top: 16px; }
+  .carousel-track {
+    display: flex; gap: 16px; overflow-x: auto;
+    scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    padding-bottom: 2px;
+  }
+  .carousel-track::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  .cert {
+    flex: 0 0 clamp(240px, 44%, 320px); scroll-snap-align: start;
+    border: 1px solid var(--line); border-radius: 8px; background: #0a0a0d;
+    padding: 18px; display: flex; flex-direction: column; gap: 8px;
+    transition: border-color 150ms ease, transform 150ms ease;
+  }
+  .cert:hover { border-color: var(--green); transform: translateY(-2px); }
+  .cert .issuer { font-size: 11.5px; color: var(--yellow); }
+  .cert h3 { font-size: 14px; color: var(--text); line-height: 1.4; font-weight: 600; }
+  .cert .date { font-size: 12px; color: var(--dim); }
+  .cert .verify { font-size: 12px; margin-top: auto; }
+  .carousel-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-top: 14px;
+  }
+  .carousel-btns { display: flex; gap: 8px; }
+  .car-nav {
+    background: transparent; border: 1px solid var(--line); color: var(--text);
+    border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
+    font-family: var(--mono); font-size: 13px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color 150ms ease, color 150ms ease, opacity 150ms ease;
+  }
+  .car-nav:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+  .car-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .cert-count { font-size: 12px; color: var(--dim); }
+
   /* github-style contribution graph */
   .contrib-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
   .contrib-nav {
@@ -262,10 +297,15 @@
   .proj h3 a { color: inherit; }
   .proj p { color: var(--dim); font-size: 13.5px; flex: 1; }
   .thumb {
-    aspect-ratio: 16 / 8; border-radius: 5px; border: 1px dashed var(--line);
+    aspect-ratio: 16 / 8; border-radius: 5px; border: 1px solid var(--line);
     display: grid; place-items: center; background: #121216;
-    color: var(--dim); font-size: 11.5px;
+    color: var(--dim); font-size: 11.5px; overflow: hidden;
   }
+  .thumb img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 250ms ease;
+  }
+  .proj:hover .thumb img { transform: scale(1.04); }
 
   /* experience: git log style */
   .log { margin-top: 14px; display: grid; gap: 22px; }
@@ -312,9 +352,11 @@
   <a href="#hero">0:~</a>
   <a href="#about">1:about</a>
   <a href="#skills">2:skills</a>
-  <a href="#work">3:work</a>
-  <a href="#experience">4:log</a>
-  <a href="#contact">5:contact</a>
+  <a href="#certs">3:certs</a>
+  <a href="#work">4:work</a>
+  <a href="#experience">5:log</a>
+  <a href="#activity">6:activity</a>
+  <a href="#contact">7:contact</a>
   <span class="spacer"></span>
   <span class="clock">zsh · draft-0.2</span>
 </nav>
@@ -392,34 +434,123 @@
     </div>
   </section>
 
+  <section class="window w-wide" id="certs">
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">certificates — ls ~/certs</span></div>
+    <div class="body">
+      <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~/certs</span>$ <span class="cmd">ls -la --sort=date</span></div>
+      <div class="carousel">
+        <div class="carousel-track" id="cert-track" tabindex="0" aria-label="Certificates carousel">
+
+          <article class="cert">
+            <span class="issuer">Coursera · IBM</span>
+            <h3>IBM AI Developer</h3>
+            <span class="date">Specialization</span>
+            <a class="verify" href="https://www.coursera.org/account/accomplishments/specialization/XRQQAQK1IKEQ" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Coursera · IBM</span>
+            <h3>Exploratory Data Analysis for Machine Learning</h3>
+            <span class="date">Course</span>
+            <a class="verify" href="https://www.coursera.org/account/accomplishments/verify/FE7W2DO5SGR1" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Prepare Data for ML APIs on Google Cloud</h3>
+            <span class="date">Jul 13, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Set Up an App Dev Environment on Google Cloud</h3>
+            <span class="date">Jul 13, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Build a Secure Google Cloud Network</h3>
+            <span class="date">Jul 13, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Implementing Cloud Load Balancing for Compute Engine</h3>
+            <span class="date">Jul 13, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Google Cloud Computing Foundations: Data, ML, and AI in Google Cloud</h3>
+            <span class="date">Jul 13, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Google Cloud Computing Foundations: Infrastructure in Google Cloud</h3>
+            <span class="date">Jul 9, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Google Cloud Computing Foundations: Networking &amp; Security in Google Cloud</h3>
+            <span class="date">Jul 9, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+          <article class="cert">
+            <span class="issuer">Google Cloud Skills</span>
+            <h3>Google Cloud Computing Foundations: Cloud Computing Fundamentals</h3>
+            <span class="date">Jun 9, 2024</span>
+            <a class="verify" href="https://www.skills.google/public_profiles/d6dd6f77-a78f-48a7-9180-37d672014c99" target="_blank" rel="noopener">verify ↗</a>
+          </article>
+
+        </div>
+        <div class="carousel-nav">
+          <span class="cert-count">10 credentials · Google Cloud, Coursera/IBM</span>
+          <div class="carousel-btns">
+            <button class="car-nav" id="cert-prev" aria-label="Previous certificates">&#9664;</button>
+            <button class="car-nav" id="cert-next" aria-label="Next certificates">&#9654;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="window w-wide" id="work">
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">~/projects — 4 items</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~/projects</span>$ <span class="cmd">ls --featured</span></div>
       <div class="proj-grid">
         <article class="proj">
-          <div class="thumb">[ project screenshot ]</div>
+          <div class="thumb"><img src="MakiPrint.png" alt="MakiPrint screenshot" loading="lazy" decoding="async"></div>
           <span class="path">(Private Repository)</span>
           <h3><a>MakiPrint ↗</a></h3>
           <p>A print-cost estimation web app that analyzes uploaded images to compute CMYK ink coverage and whitespace, then predicts ink usage with a trained neural model — helping print shops quote jobs accurately. Includes role-based access and PDF handling.</p>
           <div class="tags"><span class="tag">Flask</span><span class="tag">PyTorch</span><span class="tag">NumPy</span><span class="tag">Supabase</span><span class="tag">PostgreSQL</span><span class="tag">Docker</span></div>
         </article>
         <article class="proj">
-          <div class="thumb">[ project screenshot ]</div>
+          <div class="thumb"><img src="TerraPrice.png" alt="TerraPrice screenshot" loading="lazy" decoding="async"></div>
           <span class="path">~/projects/terraprice</span>
           <h3><a href="https://github.com/dev-aldrine/TerraPrice">TerraPrice ↗</a></h3>
           <p>An agricultural forecasting tool that predicts food/crop prices from geographic location using regional data, historical trends, and time-series models — giving farmers and planners a data-driven view of upcoming market changes.</p>
           <div class="tags"><span class="tag">Flask</span><span class="tag">scikit-learn</span><span class="tag">Pandas</span><span class="tag">JavaScript</span></div>
         </article>
         <article class="proj">
-          <div class="thumb">[ project screenshot ]</div>
+          <div class="thumb"><img src="crosswalk.png" alt="Crosswalk CV screenshot" loading="lazy" decoding="async"></div>
           <span class="path">~/projects/computer_vision_crosswalk</span>
           <h3><a href="https://github.com/kamachi-dev/red-light-green-light">Crosswalk CV ↗</a></h3>
           <p>A computer-vision project for detecting pedestrian crosswalks and activity from camera input, applying image-processing and deep-learning techniques to real-world street scenes.</p>
           <div class="tags"><span class="tag">Python</span><span class="tag">OpenCV</span><span class="tag">PyTorch</span></div>
         </article>
         <article class="proj">
-          <div class="thumb">[ project screenshot ]</div>
+          <div class="thumb"><img src="hireswift.png" alt="HireSwift screenshot" loading="lazy" decoding="async"></div>
           <span class="path">~/projects/hireswift</span>
           <h3><a href="https://github.com/dev-aldrine/hireswift_">HireSwift ↗</a></h3>
           <p>A hiring-automation platform that streamlines candidate screening by using LLMs and NLP to parse resumes and extract key details — skills, experience, and qualifications — so recruiters can shortlist applicants faster and more consistently.</p>
@@ -486,11 +617,12 @@
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">contact — ssh</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ <span class="cmd">ssh guest@yourdomain.dev</span></div>
-      <p class="out contact-line">Connection established. Placeholder — a short line inviting people to reach out for roles, freelance work, or collaboration.</p>
+      <p class="out contact-line">Connection established. Need help? Reach out.</p>
       <div class="contact-links">
-        <a class="btn btn-primary" href="mailto:you@example.com">mail --to me</a>
+        <a class="btn btn-primary" href="mailto:johnaldrine.lim.04@gmail.com">johnaldrine.lim.04@gmail.com</a>
         <a class="btn" href="https://github.com/dev-aldrine">github</a>
-        <a class="btn" href="#">linkedin</a>
+        <a class="btn" href="https://www.linkedin.com/in/john-aldrine-lim-a75a442ba/">linkedin</a>
+        <a class="btn">63+ 0995 726 9133</a>
       </div>
     </div>
   </section>
@@ -785,6 +917,33 @@
     bar.addEventListener("pointerup", release);
     bar.addEventListener("pointercancel", release);
   });
+
+  // Certificates carousel — scroll by one card, disable arrows at the ends
+  (() => {
+    const track = document.getElementById("cert-track");
+    const prev = document.getElementById("cert-prev");
+    const next = document.getElementById("cert-next");
+    if (!track) return;
+
+    const step = () => {
+      const card = track.querySelector(".cert");
+      if (!card) return track.clientWidth;
+      const gap = parseFloat(getComputedStyle(track).gap) || 16;
+      return card.getBoundingClientRect().width + gap;
+    };
+
+    const sync = () => {
+      const max = track.scrollWidth - track.clientWidth - 1;
+      prev.disabled = track.scrollLeft <= 0;
+      next.disabled = track.scrollLeft >= max;
+    };
+
+    prev.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+    next.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+    track.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    sync();
+  })();
 
   // GitHub contribution graph — public proxy (no auth token needed), switchable by year
   (() => {
