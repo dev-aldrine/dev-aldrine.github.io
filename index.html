@@ -441,17 +441,31 @@
     white-space: nowrap; overflow-x: auto;
   }
   footer .mode { color: var(--green); font-weight: 700; }
-  footer .foot-right { display: flex; align-items: center; gap: 12px; }
-  .float-toggle {
-    background: transparent; border: 1px solid var(--line); color: var(--dim);
-    font-family: var(--mono); font-size: 11px; line-height: 1;
-    padding: 4px 9px; border-radius: 4px; cursor: pointer;
-    transition: border-color 150ms ease, color 150ms ease;
+
+  /* floating toggle — fixed above the footer, bottom-left */
+  .float-switch {
+    position: fixed; left: 16px; bottom: 46px; z-index: 120;
+    display: flex; align-items: center; gap: 9px;
+    background: #0a0a0c; border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 13px 6px 9px;
+    font-size: 11.5px; color: var(--dim);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.8);
   }
-  .float-toggle:hover { border-color: var(--green); color: var(--green); }
-  .float-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-  .float-toggle .led { color: var(--green); }
-  .float-toggle[aria-pressed="false"] .led { color: #4b4f57; }
+  .switch { background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; }
+  .switch:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 999px; }
+  .switch-track {
+    width: 34px; height: 18px; border-radius: 999px; display: inline-block;
+    background: #2c2c33; border: 1px solid var(--line); position: relative;
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  .switch[aria-checked="true"] .switch-track { background: var(--green); border-color: var(--green); }
+  .switch-knob {
+    position: absolute; top: 2px; left: 2px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #83878f; transition: translate 180ms ease, background 180ms ease;
+  }
+  .switch[aria-checked="true"] .switch-knob { translate: 16px 0; background: #050506; }
+  .switch-label { user-select: none; }
 
   /* floating disabled — windows rest at their drag offset */
   body.no-float .window { animation: none; }
@@ -815,14 +829,16 @@
   </div>
 </div>
 
+<div class="float-switch">
+  <button class="switch" id="float-toggle" role="switch" aria-checked="true" aria-label="Float windows">
+    <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+  </button>
+  <span class="switch-label" aria-hidden="true">float</span>
+</div>
+
 <footer>
   <span><span class="mode">-- NORMAL --</span>&nbsp; © 2026 John Aldrine Lim · Portfolio</span>
-  <span class="foot-right">
-    <button class="float-toggle" id="float-toggle" aria-pressed="true">
-      <span class="led" aria-hidden="true">●</span> float: <span id="float-state">on</span>
-    </button>
-    <span aria-hidden="true">utf-8 · unix · 100%</span>
-  </span>
+  <span aria-hidden="true">utf-8 · unix · 100%</span>
 </footer>
 
 <script>
@@ -998,6 +1014,22 @@
     }
     let rx = 0.4, ry = 0.2, boost = 0, boostTarget = 0, lastScroll = window.scrollY;
 
+    // The tesseract traces a continuous path as the page scrolls — a Lissajous
+    // curve, so x and y sweep at different rates and it never retraces itself.
+    // SWEEP_X/Y = how many times each axis oscillates over the whole page.
+    const SWEEP_X = 1.5, SWEEP_Y = 2.5;
+    const AMP_X = 0.32, AMP_Y = 0.22;   // travel range, as a fraction of viewport
+    const MID_X = 0.5, MID_Y = 0.45;    // centre of the path
+
+    // The tesseract chases that path on a spring rather than snapping to it, so it
+    // lags behind the scroll, eases in, and drifts past slightly before settling.
+    // Critical damping here would be 2*sqrt(K) ≈ 8.5 — D is deliberately under that
+    // to leave a little overshoot, which is what stops it reading as linear.
+    const SPRING_K = 18, SPRING_D = 5.5;
+    let px = null, py = null;           // current position (null until first frame)
+    let pvx = 0, pvy = 0;               // current velocity
+    let lastT = performance.now();
+
     window.addEventListener("scroll", () => {
       boostTarget = Math.min(boostTarget + Math.abs(window.scrollY - lastScroll) * 0.00008, 0.03);
       lastScroll = window.scrollY;
@@ -1012,7 +1044,24 @@
       ry += speed;
 
       ctx.clearRect(0, 0, w, h);
-      const cx = w * 0.78, cy = h * 0.42;
+
+      // position follows scroll continuously along the path
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const prog = maxScroll > 0 ? Math.min(Math.max(window.scrollY / maxScroll, 0), 1) : 0;
+      const tx = (MID_X + AMP_X * Math.cos(prog * Math.PI * 2 * SWEEP_X)) * w;
+      const ty = (MID_Y + AMP_Y * Math.sin(prog * Math.PI * 2 * SWEEP_Y)) * h;
+      if (px === null) { px = tx; py = ty; }      // start in place, don't fly in
+
+      // spring toward the scroll target (dt-based so it feels the same at any refresh rate)
+      const nowT = performance.now();
+      const dt = Math.min((nowT - lastT) / 1000, 0.032);
+      lastT = nowT;
+      pvx += (-SPRING_K * (px - tx) - SPRING_D * pvx) * dt;
+      pvy += (-SPRING_K * (py - ty) - SPRING_D * pvy) * dt;
+      px += pvx * dt;
+      py += pvy * dt;
+
+      const cx = px, cy = py;
       const scale = Math.min(w, h) * TESSERACT_SIZE;
       const cA = Math.cos(rx), sA = Math.sin(rx);   // XW plane (4D)
       const cB = Math.cos(ry), sB = Math.sin(ry);   // YZ plane (4D)
@@ -1112,7 +1161,6 @@
   // Footer toggle — let readers stop the windows floating (remembers the choice)
   (() => {
     const btn = document.getElementById("float-toggle");
-    const state = document.getElementById("float-state");
     if (!btn) return;
     const KEY = "float-pref";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1122,8 +1170,7 @@
 
     const apply = () => {
       document.body.classList.toggle("no-float", !on);
-      btn.setAttribute("aria-pressed", String(on));
-      state.textContent = on ? "on" : "off";
+      btn.setAttribute("aria-checked", String(on));
     };
 
     btn.addEventListener("click", () => {
