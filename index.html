@@ -178,15 +178,33 @@
   .hero-name .accent { color: var(--green); }
   .hero-role { color: var(--magenta); font-size: 17px; }
   .hero-blurb { color: var(--dim); max-width: 58ch; margin: 18px 0 26px; }
-  .focus-cards { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 26px; }
-  .focus-card {
-    border: 1px solid var(--line); border-radius: 8px;
-    background: #0a0a0d; padding: 10px 14px; font-size: 13px; color: var(--text);
-    display: inline-flex; align-items: center; gap: 8px;
-    transition: border-color 150ms ease, transform 150ms ease;
+  /* focus areas — one card, infinitely scrolling marquee */
+  .focus-marquee {
+    position: relative; overflow: hidden;
+    border: 1px solid var(--line); border-radius: 8px; background: #0a0a0d;
+    padding: 11px 0; margin: 18px 0 26px;
+    transition: border-color 150ms ease;
   }
-  .focus-card:hover { border-color: var(--green); transform: translateY(-2px); }
-  .focus-card::before { content: "▹"; color: var(--green); }
+  .focus-marquee:hover { border-color: var(--green); }
+  /* fade the two edges into the card so items don't pop in/out abruptly */
+  .focus-marquee::before, .focus-marquee::after {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 46px; z-index: 1;
+    pointer-events: none;
+  }
+  .focus-marquee::before { left: 0; background: linear-gradient(to right, #0a0a0d, transparent); }
+  .focus-marquee::after { right: 0; background: linear-gradient(to left, #0a0a0d, transparent); }
+  .focus-track {
+    display: flex; width: max-content;
+    animation: marquee 26s linear infinite;
+  }
+  .focus-marquee:hover .focus-track { animation-play-state: paused; }
+  .focus-track span {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 20px; font-size: 13px; color: var(--text); white-space: nowrap;
+  }
+  .focus-track span::before { content: "▹"; color: var(--green); }
+  /* the track holds two identical copies, so -50% lands exactly on the seam */
+  @keyframes marquee { to { transform: translateX(-50%); } }
   .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
   .btn {
     display: inline-flex; align-items: center; min-height: 44px;
@@ -534,15 +552,22 @@
     <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">dev@aldrine: ~ — zsh</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~</span>$ <span class="cmd">whoami</span></div>
-      <h1 class="hero-name">John Aldrine Lim<span class="accent">_</span></h1>
+      <h1 class="hero-name"><span id="glitch-name">John Aldrine Lim</span><span class="accent">_</span></h1>
       <p class="hero-role">// Software Developer — Sta. Rosa, PH</p>
       <p class="hero-blurb">$ uv run portfolio.py</p>
-      <div class="focus-cards">
-        <span class="focus-card">AI &amp; Machine Learning</span>
-        <span class="focus-card">Full-Stack Development</span>
-        <span class="focus-card">Software Engineering</span>
-        <span class="focus-card">Game Development</span>
-        <span class="focus-card">Cloud Deployment</span>
+      <div class="focus-marquee">
+        <div class="focus-track">
+          <span>AI &amp; Machine Learning</span>
+          <span>Full-Stack Development</span>
+          <span>Software Engineering</span>
+          <span>Game Development</span>
+          <span>Cloud Deployment</span>
+          <span aria-hidden="true">AI &amp; Machine Learning</span>
+          <span aria-hidden="true">Full-Stack Development</span>
+          <span aria-hidden="true">Software Engineering</span>
+          <span aria-hidden="true">Game Development</span>
+          <span aria-hidden="true">Cloud Deployment</span>
+        </div>
       </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#work">./view-work.sh</a>
@@ -694,7 +719,7 @@
   </section>
 
   <section class="window w-wide" id="work">
-    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">~/projects — 4 items</span></div>
+    <div class="titlebar"><span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span><span class="title">~/projects — 5 items</span></div>
     <div class="body">
       <div class="prompt"><span class="u">dev@aldrine</span>:<span class="p">~/projects</span>$ <span class="cmd">ls --featured</span></div>
       <div class="proj-grid">
@@ -725,6 +750,13 @@
           <h3><a href="https://github.com/dev-aldrine/hireswift_">HireSwift ↗</a></h3>
           <p>A hiring-automation platform that streamlines candidate screening by using LLMs and NLP to parse resumes and extract key details — skills, experience, and qualifications — so recruiters can shortlist applicants faster and more consistently.</p>
           <div class="tags"><span class="tag">Python</span><span class="tag">NLP</span><span class="tag">LLM</span><span class="tag">PHP</span><span class="tag">MySQL</span></div>
+        </article>
+        <article class="proj">
+          <div class="thumb"><img src="avalia.png" alt="Avalia cinema booking screenshot" loading="lazy" decoding="async"></div>
+          <span class="path">~/projects/avalia</span>
+          <h3><a href="https://github.com/mvillamante/Avalia">Avalia ↗</a></h3>
+          <p>An online cinema ticket booking system where patrons browse films, pick showtimes, and reserve seats in one flow. Built as a full-stack ASP.NET web application backed by a seat/showtime reservation model.</p>
+          <div class="tags"><span class="tag">ASP.NET</span><span class="tag">C#</span><span class="tag">JavaScript</span><span class="tag">CSS</span></div>
         </article>
       </div>
     </div>
@@ -875,6 +907,116 @@
 </footer>
 
 <script>
+  // Theme — dark at the top, and once you cross the halfway mark it eases over to
+  // light on its own clock (not glued to the scrollbar). Publishes window.__ink so
+  // the canvases flip colour with it and never disappear into the background.
+  (() => {
+    const BG_DARK = [5, 5, 6], BG_LIGHT = [255, 255, 255];
+    const INK_DARK = [216, 228, 238];   // ink while the page is dark
+    const INK_LIGHT = [0, 0, 0];        // ink once the page is light
+    const root = document.documentElement;
+    const blend = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+
+    let m = 0;          // current position of the fade, 0 = dark, 1 = light
+    let target = 0;     // where it's heading
+    let raf = null;
+    window.__ink = INK_DARK;
+
+    function apply() {
+      root.style.setProperty("--desk", `rgb(${blend(BG_DARK, BG_LIGHT, m).join(",")})`);
+      window.__ink = blend(INK_DARK, INK_LIGHT, m);
+    }
+
+    function run() {
+      m += (target - m) * 0.022;                // exponential ease toward the target
+      if (Math.abs(target - m) < 0.002) {       // settled — stop burning frames
+        m = target;
+        apply();
+        raf = null;
+        return;
+      }
+      apply();
+      raf = requestAnimationFrame(run);
+    }
+
+    function onScroll() {
+      const maxScroll = root.scrollHeight - window.innerHeight;
+      if (maxScroll <= 0) return;
+      const p = window.scrollY / maxScroll;
+      // 4% deadband around the midpoint, so parking right on the line can't flicker
+      if (p >= 0.52) target = 1;
+      else if (p <= 0.48) target = 0;
+      if (raf === null && m !== target) raf = requestAnimationFrame(run);
+    }
+
+    apply();
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+  })();
+
+  // Hero name — letters flicker through diacritic variants of themselves, then snap back
+  (() => {
+    const el = document.getElementById("glitch-name");
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const VARIANTS = {
+      a: "àáâãäåāăą",  A: "ÀÁÂÃÄÅĀĂĄ",
+      e: "èéêëēĕėęě",  E: "ÈÉÊËĒĔĖĘĚ",
+      i: "ìíîïĩīĭįı",  I: "ÌÍÎÏĨĪĬĮİ",
+      o: "òóôõöøōŏő",  O: "ÒÓÔÕÖØŌŎŐ",
+      u: "ùúûüũūŭůűų", U: "ÙÚÛÜŨŪŬŮŰŲ",
+      n: "ñńņň",       N: "ÑŃŅŇ",
+      c: "çćĉċč",      C: "ÇĆĈĊČ",
+      s: "śŝşš",       S: "ŚŜŞŠ",
+      y: "ýÿŷ",        Y: "ÝŸŶ",
+      r: "ŕŗř",        R: "ŔŖŘ",
+      l: "ĺļľł",       L: "ĹĻĽŁ",
+      d: "ďđ",         D: "ĎĐ",
+      z: "źżž",        Z: "ŹŻŽ",
+      g: "ĝğġģ",       G: "ĜĞĠĢ",
+      t: "ţťŧ",        T: "ŢŤŦ",
+      h: "ĥħ",         H: "ĤĦ",
+      j: "ĵ",          J: "Ĵ",
+      w: "ŵ",          W: "Ŵ",
+      k: "ķ",          K: "Ķ",
+    };
+
+    const base = [...el.textContent];
+    const live = [...base];
+    // only letters that actually have accented forms can flicker
+    const eligible = base.map((c, i) => (VARIANTS[c] ? i : -1)).filter((i) => i >= 0);
+    if (!eligible.length) return;
+    const busy = new Set();
+
+    function flicker() {
+      const free = eligible.filter((i) => !busy.has(i));
+      if (!free.length) return;
+      const i = free[Math.floor(Math.random() * free.length)];
+      const pool = VARIANTS[base[i]];
+      busy.add(i);
+
+      let n = 0;
+      const cycles = 3 + Math.floor(Math.random() * 4); // a few rapid swaps
+      const id = setInterval(() => {
+        live[i] = pool[Math.floor(Math.random() * pool.length)];
+        el.textContent = live.join("");
+        if (++n >= cycles) {
+          clearInterval(id);
+          live[i] = base[i];            // snap back to the real letter
+          el.textContent = live.join("");
+          busy.delete(i);
+        }
+      }, 55);
+    }
+
+    setInterval(() => {
+      flicker();
+      if (Math.random() > 0.65) flicker(); // occasionally two at once
+    }, 1100);
+  })();
+
   // Minimal particle network background
   (() => {
     const canvas = document.getElementById("particles");
@@ -922,7 +1064,9 @@
         ory = r.height / 2 + ORBIT_MARGIN;
       }
 
-      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      const ink = window.__ink || [0, 0, 0];
+      const INK = ink.join(", ");
+      ctx.shadowColor = `rgba(${INK}, 0.4)`;
       ctx.shadowBlur = 6;
       for (const p of particles) {
         let influenced = false;
@@ -974,7 +1118,7 @@
         p.x += p.vx; p.y += p.vy;
         if (p.x < 0 || p.x > w) p.vx *= -1;
         if (p.y < 0 || p.y > h) p.vy *= -1;
-        ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+        ctx.fillStyle = `rgba(${INK}, 0.75)`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
         ctx.fill();
@@ -998,7 +1142,7 @@
           }
           if (d2 < LINK_DIST * LINK_DIST) {
             const alpha = 0.16 * (1 - Math.sqrt(d2) / LINK_DIST);
-            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.strokeStyle = `rgba(${INK}, ${alpha})`;
             ctx.lineWidth = 2.6;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -1116,9 +1260,10 @@
         const p3 = 3.4 / (3.4 + z2);
         pts.push([cx + x1 * scale * p3, cy + y1 * scale * p3]);
       }
-      ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+      const INK = (window.__ink || [0, 0, 0]).join(", ");
+      ctx.shadowColor = `rgba(${INK}, 0.35)`;
       ctx.shadowBlur = 12;
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.28)";
+      ctx.strokeStyle = `rgba(${INK}, 0.28)`;
       ctx.lineWidth = 4;
       ctx.beginPath();
       for (const [a, b] of E) {
@@ -1127,7 +1272,7 @@
       }
       ctx.stroke();
       // brighten the corners
-      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+      ctx.fillStyle = `rgba(${INK}, 0.7)`;
       for (const [x, y] of pts) {
         ctx.beginPath();
         ctx.arc(x, y, 2.8, 0, Math.PI * 2);
